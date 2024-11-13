@@ -1,0 +1,14 @@
+!! Factorial algorithm !!
+
+LET Factorial BE
+    IN(n):    $ Input the number n
+
+    result = 1:    $ Initialize result as 1
+
+    WHILE {1 < n} REPEAT    $ Continue loop as long as n is not 0
+        result = result * n:    $ Multiply result by n
+        n = n - 1:    $ Decrease n by 1
+    END:
+
+    OUT(result):    $ Output the factorial result
+END

@@ -1,0 +1,11 @@
+!! Conditiona lProgram !!
+
+LET Conditional_program BE
+    IN(x):
+    IF {x == 0} THEN
+        OUT(x):
+    ELSE	
+	x = 1:
+        OUT(x):
+    END:
+END

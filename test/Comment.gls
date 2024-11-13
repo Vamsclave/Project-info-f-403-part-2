@@ -1,0 +1,9 @@
+!! Comment Example !!
+
+LET Comment_example BE
+    a = 10:    $ This is a short comment
+    !! This is a long comment explaining the next part !!
+    b = 20:
+    c = a + b:
+    OUT(c):    $ Output the sum of a and b
+END
