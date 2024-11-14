@@ -189,4 +189,28 @@
         }
         return res;
     }
+
+    /**
+     * Returns a LaTeX representation of the symbol.
+     * 
+     * @return a string containing LaTeX code of a representation of the token's value and type.
+     */
+	public String toTexString(){
+        String value = "";
+		if(this.isTerminal()){
+            if (this.type == LexicalUnit.VARNAME || this.type == LexicalUnit.NUMBER) {
+                value = this.value != null? ": "+this.value.toString() : "";
+            }
+			final String type = this.type  != null? this.type.toTexString()  : "null";
+			return type+value;
+		} else {
+            if (this.value != null && this.value instanceof NonTerminal) {
+                value	= ((NonTerminal) this.value).toTexString();
+            } else {
+                value="null";
+            }
+			return value;
+        }
+		//return "UNREACHABLE RETURN";
+	}
  }

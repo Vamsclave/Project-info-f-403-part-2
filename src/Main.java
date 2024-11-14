@@ -1,51 +1,84 @@
-import java.io.*;
-import java.util.*;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class Main{
     /**
      *
-     * The Analyzer for Gillis Program
+     * The parser
      *
-     * @param args  The path of the file that contains a Gillis Program to give to the analyzer
-     * @throws IOException java.io.IOException
+     * @param args  The argument(s) given to the program
+     * @throws IOException java.io.IOException if an I/O-Error occurs
+     * @throws FileNotFoundException java.io.FileNotFoundException if the specified file does not exist
      *
      */
-    public static void main(String[] args) throws IOException {
-        if(args.length != 1) {
-            System.out.println("Please use this format:");
-            System.out.println("java -jar dest/part1.jar test/file.gls");
+    public static void main(String[] args) throws FileNotFoundException, IOException, SecurityException, Exception{
+        // Display the usage when no arguments are given
+        if(args.length == 0){
+            System.out.println("Usage:  java -jar part2.jar [OPTION] [FILE]\n"
+                               + "\tOPTION:\n"
+                               + "\t -wt (write-tree) filename.tex: writes latex tree to filename.tex\n"
+                               + "\tFILE:\n"
+                               + "\tA .ppm file containing a PascalMaisPresque program\n"
+                               );
             System.exit(0);
-        }
-        // Creating the file using the filePath
-        File file = new File(args[0]);
-        FileReader fileData = null;
-        // checking if the file exists
-        if (file.exists()){
-            fileData = new FileReader(file);
-        }else{
-            System.out.println("Please give a valid file for file.gls");
-            System.exit(0);
-        }
-        // give the data of the file to the analyzer
-        final LexicalAnalyzer analyzer = new LexicalAnalyzer(fileData);
-        // dictionnary used to store variable inside
-        Map<String, Symbol> dictionnary = new TreeMap<>();
-        // symbol represents the currently read symbol
-        Symbol symbol = null;
-        // We iterate while we do not reach the end of the file (marked by EOS)
-        while(!(symbol = analyzer.nextToken()).getType().equals(LexicalUnit.EOS)){
-            System.out.println(symbol.toString());
-            // If it is a variable, add it to the table
-            if(symbol.getType().equals(LexicalUnit.VARNAME)){
-                if(!dictionnary.containsKey(symbol.getValue().toString())){
-                    dictionnary.put(symbol.getValue().toString(),symbol);
+        } else {
+            boolean writeTree = false;
+            boolean fullOutput = false;
+            BufferedWriter bwTree = null;
+            FileWriter fwTree = null;
+            FileReader codeSource = null;
+            try {
+                codeSource = new FileReader(args[args.length-1]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ParseTree parseTree = null;
+            String tex="\\documentclass{standalone}\\begin{document}Parsing error, no tree produced.\\end{document}";
+
+            for (int i = 0 ; i < args.length; i++) {
+                if (args[i].equals("-wt") || args[i].equals("--write-tree")) {
+                    writeTree = true;
+                    try {
+                        fwTree = new FileWriter(args[i+1]);
+                        bwTree = new BufferedWriter(fwTree);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (args[i].equals("-dr") || args[i].equals("--display-rules") ) {
+                    fullOutput = true;
+                }
+            }
+            Parser parser = new Parser(codeSource);
+            if (fullOutput) {parser.displayFullRules();}
+            try {
+                parseTree = parser.parse();
+                if (writeTree) {tex=parseTree.toLaTeX();};
+            } catch (ParseException e) {
+                System.out.println("Error:> " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Error:> " + e);
+            }
+            if (writeTree) {
+                try {
+                    bwTree.write(tex);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (bwTree != null)
+                            bwTree.close();
+                        if (fwTree != null)
+                            fwTree.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
-        System.out.println("\nVariables");
-        // Print the variables
-        for(Map.Entry<String, Symbol> variable : dictionnary.entrySet())
-            System.out.println(variable.getKey()+"\t"+(variable.getValue().getLine()));
     }
 }
